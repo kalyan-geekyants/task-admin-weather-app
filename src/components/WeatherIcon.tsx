@@ -13,40 +13,42 @@ import {
 
 interface WeatherIconProps {
   weatherIcon: string
+  dataType: 'today' | 'forecast'
 }
 
-export const WeatherIcon: React.FC<WeatherIconProps> = ({ weatherIcon: name }) => {
+export const WeatherIcon: React.FC<WeatherIconProps> = ({ weatherIcon: name, dataType }) => {
   const renderWeatherIcon = (icon: string) => {
+    const iconSize = dataType === 'today' ? 150 : 65
     switch (icon) {
       case '01d':
       case '01n':
-        return <WiDaySunny size={150} color='#fff' />
+        return <WiDaySunny size={iconSize} color='#fff' />
       case '02d':
       case '02n':
-        return <WiDayCloudy size={150} color='#fff' />
+        return <WiDayCloudy size={iconSize} color='#fff' />
       case '03d':
       case '03n':
-        return <WiCloud size={150} color='#fff' />
+        return <WiCloud size={iconSize} color='#fff' />
       case '04d':
       case '04n':
-        return <WiCloudy size={150} color='#fff' />
+        return <WiCloudy size={iconSize} color='#fff' />
       case '09d':
       case '09n':
-        return <WiHail size={150} color='#fff' />
+        return <WiHail size={iconSize} color='#fff' />
       case '10d':
       case '10n':
-        return <WiDayRainWind size={150} color='#fff' />
+        return <WiDayRainWind size={iconSize} color='#fff' />
       case '11d':
       case '11n':
-        return <WiDayThunderstorm size={150} color='#fff' />
+        return <WiDayThunderstorm size={iconSize} color='#fff' />
       case '13d':
       case '13n':
-        return <WiDaySnow size={150} color='#fff' />
+        return <WiDaySnow size={iconSize} color='#fff' />
       case '50d':
       case '50n':
-        return <WiFog size={150} color='#fff' />
+        return <WiFog size={iconSize} color='#fff' />
       default:
-        return <WiDayCloudy size={150} color='#fff' />
+        return <WiDayCloudy size={iconSize} color='#fff' />
     }
   }
 

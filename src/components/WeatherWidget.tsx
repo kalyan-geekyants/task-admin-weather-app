@@ -5,16 +5,18 @@ import HumidityWindSpeed from './HumidityWindSpeed'
 import Loading from './Loading'
 import Error from './Error'
 import { ErrorData } from '@/types'
+import { WeatherIcon } from './WeatherIcon'
+import ForecastWidget from './ForecastWidget'
+import { convertForcastDataToDaily } from '@/utils'
 
 const WeatherWidget = () => {
   const [weatherData, setWeatherData] = useState(null)
+  const [forecastData, setForecastData] = useState(null)
   const [isCelcius, setIsCelcius] = useState<boolean>(true)
   const [isLoadingData, setIsLoadingData] = useState<boolean>(false)
   const [error, setError] = useState<ErrorData | null>(null)
 
   const getWeather = async (city: string) => {
-    // weather
-    // forecast
     if (!navigator.onLine) {
       setError({ message: 'No internet connection', errorType: 'internet' })
       setIsLoadingData(false)
@@ -22,46 +24,72 @@ const WeatherWidget = () => {
     }
 
     try {
-      const response = await fetch(
+      const cityWeatherResponse = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${process.env.NEXT_PUBLIC_OPENWEATHERMAP_API_KEY}&units=metric`,
       )
-      const data = await response.json()
+      const cityWeatherData = await cityWeatherResponse.json()
 
-      if (data?.cod === '404') {
-        setError({ message: data?.message, errorType: 'city' })
+      const cityForecastResponse = await fetch(
+        `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${process.env.NEXT_PUBLIC_OPENWEATHERMAP_API_KEY}&units=metric`,
+      )
+
+      const cityForecaseData = await cityForecastResponse.json();
+
+      if (cityWeatherData?.cod === '404' || cityForecaseData?.cod === '400') {
+        setError({ message: cityWeatherData?.message, errorType: 'city' })
         setIsLoadingData(false)
       } else {
-        setWeatherData(data)
+        setWeatherData(cityWeatherData)
+        const forecastDataToDaily = convertForcastDataToDaily(cityForecaseData?.list)
+        console.log('cityForecaseData', forecastDataToDaily)
+        setForecastData(forecastDataToDaily as any)
       }
     } catch (e) {
-      console.log(e)
       setError({ message: 'Server error', errorType: 'server' })
     } finally {
       setIsLoadingData(false)
     }
   }
 
-  const onClickSearchBar = (city: string) => {
+  const clearData = () => {
     setWeatherData(null)
+    setForecastData(null)
     setError(null)
+  }
+
+  const onClickSearchBar = (city: string) => {
+    clearData()
     setIsLoadingData(true)
     getWeather(city)
   }
 
   return (
     <div className='container'>
-      <SearchBar getWeather={onClickSearchBar} isLoadingData={isLoadingData} />
-      {isLoadingData && <Loading />}
-      {!!error && !isLoadingData && <Error error={error} />}
-      {!!weatherData && !isLoadingData && (
-        <>
-          <div>
-            <WeatherDetails isCelcius={isCelcius} setIsCelcius={setIsCelcius} data={weatherData} />
-          </div>
-          {/* @ts-ignore */}
-          <HumidityWindSpeed humidity={weatherData?.main?.humidity} windSpeed={weatherData?.wind?.speed} />
-        </>
-      )}
+      <div className='weather_widget_container'>
+        <SearchBar getWeather={onClickSearchBar} isLoadingData={isLoadingData} />
+        {isLoadingData && <Loading />}
+        {!!error && !isLoadingData && <Error error={error} />}
+        {!!weatherData && !isLoadingData && (
+          <>
+            <div>
+              <WeatherDetails isCelcius={isCelcius} setIsCelcius={setIsCelcius} data={weatherData} />
+            </div>
+            {/* @ts-ignore */}
+            <HumidityWindSpeed humidity={weatherData?.main?.humidity} windSpeed={weatherData?.wind?.speed} />
+          </>
+        )}
+      </div>
+      {forecastData &&
+        !isLoadingData &&
+        Object.keys(forecastData)?.map((date: string, currentIndex) => (
+          <ForecastWidget
+            date={date}
+            forecastData={forecastData}
+            key={date}
+            dateIndex={currentIndex}
+            isCelcius={isCelcius}
+          />
+        ))}
     </div>
   )
 }

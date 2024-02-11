@@ -1,6 +1,7 @@
 import React from 'react'
 import Toggler from './Toggler'
 import { WeatherIcon } from './WeatherIcon'
+import { convertCelciusToFahrenheit, convertToDayAndTime, toCamelCase } from '@/utils'
 
 const WeatherDetails = ({
   isCelcius,
@@ -11,44 +12,12 @@ const WeatherDetails = ({
   setIsCelcius: (value: boolean) => void
   data: any
 }) => {
-  const convertToDayAndTime = (timestamp: number) => {
-    // Convert to milliseconds by multiplying by 1000
-    const date = new Date(timestamp * 1000)
-
-    // Get day of the week
-    const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-    const dayOfWeek = daysOfWeek[date.getDay()]
-
-    // Get hours and minutes
-    let hours: any = date.getHours()
-    let minutes = date.getMinutes()
-
-    // Convert hours to 12-hour format and determine am/pm
-    const ampm = hours >= 12 ? 'pm' : 'am'
-    hours = hours % 12
-    hours = hours ?? 12 // handle midnight (0 hours)
-
-    // Add leading zero to minutes if necessary
-    // @ts-ignore
-    minutes = minutes < 10 ? '0' + minutes : minutes
-
-    // Formatted date string
-    return dayOfWeek + ', ' + hours + ':' + minutes + ' ' + ampm
-  }
-
-  const toCamelCase = (str: string) => {
-    return str
-      .split(' ')
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ')
-  }
-
   return (
     <div className='weather-details'>
-      <WeatherIcon weatherIcon={data?.weather[0]?.icon} />
+      <WeatherIcon weatherIcon={data?.weather[0]?.icon} dataType='today' />
       <div className='flex flex-row align-center'>
         <h1 className='celsius-foreignheat'>
-          {isCelcius ? `${data?.main?.temp}°C` : `${(data?.main?.temp * (9 / 5) + 32).toFixed(2)}°F`}
+          {isCelcius ? `${data?.main?.temp}°C` : `${convertCelciusToFahrenheit(data?.main?.temp)}°F`}
         </h1>
         <div className='toggle_container'>
           <Toggler isCelcius={isCelcius} setIsCelcius={setIsCelcius} />
