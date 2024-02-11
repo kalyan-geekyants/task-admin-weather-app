@@ -29,23 +29,20 @@ const WeatherWidget = () => {
       )
       const cityWeatherData = await cityWeatherResponse.json()
 
-      const cityForecastResponse = await fetch(
-        `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${process.env.NEXT_PUBLIC_OPENWEATHERMAP_API_KEY}&units=metric`,
-      )
-
-      const cityForecaseData = await cityForecastResponse.json();
-
-      if (cityWeatherData?.cod === '404' || cityForecaseData?.cod === '400') {
+      if (cityWeatherData?.cod === '404') {
         setError({ message: cityWeatherData?.message, errorType: 'city' })
-        setIsLoadingData(false)
       } else {
-        setWeatherData(cityWeatherData)
+        const cityForecastResponse = await fetch(
+          `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${process.env.NEXT_PUBLIC_OPENWEATHERMAP_API_KEY}&units=metric`,
+        )
+        const cityForecaseData = await cityForecastResponse.json()
         const forecastDataToDaily = convertForcastDataToDaily(cityForecaseData?.list)
-        console.log('cityForecaseData', forecastDataToDaily)
+        setWeatherData(cityWeatherData)
         setForecastData(forecastDataToDaily as any)
       }
     } catch (e) {
-      setError({ message: 'Server error', errorType: 'server' })
+      console.error(e);
+      setError({ message: 'Something went wrong', errorType: 'server' })
     } finally {
       setIsLoadingData(false)
     }

@@ -15,7 +15,7 @@ function SearchBar({ getWeather, isLoadingData }: { getWeather: (city: string) =
 
   return (
     <form className='search_form' onSubmit={handleOnSubmit}>
-      <input type='text' placeholder='Enter city..' name='city' onChange={handleOnChangeCity} />
+      <input type='text' placeholder='Enter city..' name='city' onChange={handleOnChangeCity} required />
       <button type='submit' className='search_button'>
         <LuSearch />
       </button>
